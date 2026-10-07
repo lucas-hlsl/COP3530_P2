@@ -1,4 +1,5 @@
 A comparison between two data structures or algorithms on a large data set.
+https://docs.google.com/document/d/16LwqOh0NUYPkNWm8vqBsOES1XhcRxCixaEc1dREZ9Es/edit?usp=sharing
 
 # Expectations for Project 2
 There are six goals of the project and we want you to be bold here as we consider this project a formative assessment:
