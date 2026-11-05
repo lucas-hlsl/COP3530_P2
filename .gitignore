@@ -69,3 +69,7 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/
+
+# Keep the prebuilt GLFW library in the repo so a fresh clone builds
+!glfw/lib-mingw-w64/
+!glfw/lib-mingw-w64/*.a
