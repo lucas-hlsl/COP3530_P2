@@ -6,13 +6,15 @@
             "label": "Build C++",
             "command": "g++",
             "args": [
+                "-std=c++17",
                 "-g",
                 "src/main.cpp",
+                "src/Dataset.cpp",
                 "-o",
                 "bin/main.exe",
-                "-I", 
+                "-I",
                 "glfw/include",
-                "-L", 
+                "-L",
                 "glfw/lib-mingw-w64",
                 "-lglfw3",
                 "-lopengl32",
@@ -26,6 +28,37 @@
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "type": "cppbuild",
+            "label": "Build tests",
+            "command": "g++",
+            "args": [
+                "-std=c++17",
+                "-O2",
+                "-Wall",
+                "src/Dataset.cpp",
+                "tests/test_dataset.cpp",
+                "-o",
+                "bin/test_dataset.exe"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": ["$gcc"],
+            "group": "build"
+        },
+        {
+            "type": "process",
+            "label": "Run tests",
+            "command": "${workspaceFolder}/bin/test_dataset.exe",
+            "args": ["datasets/supermarket_large_dataset.csv"],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "dependsOn": "Build tests",
+            "problemMatcher": [],
+            "group": "test"
         }
     ]
 }
