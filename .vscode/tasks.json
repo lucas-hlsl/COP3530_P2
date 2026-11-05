@@ -10,6 +10,7 @@
                 "-g",
                 "src/main.cpp",
                 "src/Dataset.cpp",
+                "src/Render.cpp",
                 "-o",
                 "bin/main.exe",
                 "-I",
