@@ -11,10 +11,10 @@ Dataset Data;
 std::unordered_map<int,int> m_r_map, q_r_map;
 //[key : every thousandth transaction id, value: location of current index]
 //will be used for rendering purposes only relevant thing for rendering
-std::vector<int>  m_data = Data.identifyOrder(), q_data = m_data; //each int represents a transaction row
+std::vector<int>  m_data, q_data; //each int represents a transaction row
 
-void Merge(vector<int>& data, int ctin, int stin, int mdin, int enin) {
-    vector<int> temp(enin-stin+1);
+void Merge(std::vector<int>& data, int ctin, int stin, int mdin, int enin) {
+    std::vector<int> temp(enin-stin+1);
     int ldin = stin, rdin = mdin+1, tin = 0; //left subarray data index, right subarray data index, temp array index
     while (ldin <= mdin && rdin <= enin) {
         if (Data.less(ctin, ldin, rdin)) {
@@ -46,7 +46,7 @@ void Merge(vector<int>& data, int ctin, int stin, int mdin, int enin) {
         //call an update
     }
 }
-void MergeSort(vector<int>& data, int ctin, int stin, int enin) { //data, category index, start indsex, end index
+void MergeSort(std::vector<int>& data, int ctin, int stin, int enin) { //data, category index, start indsex, end index
     if (!(stin >= enin)) {
         int mdin = (stin + enin)/2; // middle index
         MergeSort(data, ctin, stin, mdin);
@@ -54,9 +54,9 @@ void MergeSort(vector<int>& data, int ctin, int stin, int enin) { //data, catego
         Merge(data, ctin, stin, mdin, enin);
     }
 }
-int Pivot(vector<int>& data,int ctin, int stin, int enin) {
-    vector<int> temp1(enin-stin+1);
-    vector<int> temp2(enin-stin);
+int Pivot(std::vector<int>& data,int ctin, int stin, int enin) {
+    std::vector<int> temp1(enin-stin+1);
+    std::vector<int> temp2(enin-stin);
     int pivin = 0, t2in = 0;
     for (int i = 1; i < enin-stin+1; ++i) {
         if (Data.less(ctin, (stin+i), stin)) {
@@ -91,7 +91,7 @@ int Pivot(vector<int>& data,int ctin, int stin, int enin) {
     }
     return stin+pivin;
 }
-void QuickSort(vector<int>& data, int ctin, int stin, int enin) {
+void QuickSort(std::vector<int>& data, int ctin, int stin, int enin) {
     if (!(stin >= enin)) {
         int pin = Pivot(data, ctin, stin, enin);
         QuickSort(data, ctin, stin, pin-1);
