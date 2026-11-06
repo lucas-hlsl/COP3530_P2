@@ -5,19 +5,19 @@
 #include <iostream>
 #include <GLFW/glfw3.h>
 
-unordered_map<string,int> id_index; //[transaction id, int index]
-unordered_map<int,int> m_r_map, q_r_map;
+#include "Dataset.h"
+
+Dataset Data;
+std::unordered_map<int,int> m_r_map, q_r_map;
 //[key : every thousandth transaction id, value: location of current index]
 //will be used for rendering purposes only relevant thing for rendering
-unordered_map<string,int> data_names; //[what the data is, index]
-vector<vector<string>*>  m_data, q_data; //whole_dataset, each containing the transaction data.
+std::vector<int>  m_data = Data.identifyOrder(), q_data = m_data; //each int represents a transaction row
 
-void Merge(vector<vector<string>*>& data, int ctin, int stin, int mdin, int enin) {
-    vector<vector<string>*> temp(enin-stin+1);
+void Merge(vector<int>& data, int ctin, int stin, int mdin, int enin) {
+    vector<int> temp(enin-stin+1);
     int ldin = stin, rdin = mdin+1, tin = 0; //left subarray data index, right subarray data index, temp array index
-
     while (ldin <= mdin && rdin <= enin) {
-        if (data[ldin]->at(ctin) <= data[rdin]->at(ctin) ) {
+        if (Data.less(ctin, ldin, rdin)) {
             temp[tin] = data[ldin];
             ++ldin;
         } else {
@@ -37,9 +37,8 @@ void Merge(vector<vector<string>*>& data, int ctin, int stin, int mdin, int enin
     //^above deals with whats left after the while loop
     for (int i = 0; i < enin-stin+1; ++i) {
         data[stin+i] = temp[i];
-        auto it = id_index.find(temp[i]->at(0));
-        if (it != id_index.end()) {
-            m_r_map[it->second] = stin+i;
+        if (temp[i]%1000 == 999 && temp[i]/1000 > 0) {
+            m_r_map[temp[i]/1000] = stin+i;
             //rendering update needs to be called here
         }
         //check temp[i][0] is in the id_index
@@ -47,7 +46,7 @@ void Merge(vector<vector<string>*>& data, int ctin, int stin, int mdin, int enin
         //call an update
     }
 }
-void MergeSort(vector<vector<string>*>& data, int ctin, int stin, int enin) { //data, category index, start indsex, end index
+void MergeSort(vector<int>& data, int ctin, int stin, int enin) { //data, category index, start indsex, end index
     if (!(stin >= enin)) {
         int mdin = (stin + enin)/2; // middle index
         MergeSort(data, ctin, stin, mdin);
@@ -55,12 +54,12 @@ void MergeSort(vector<vector<string>*>& data, int ctin, int stin, int enin) { //
         Merge(data, ctin, stin, mdin, enin);
     }
 }
-int Pivot(vector<vector<string>*>& data,int ctin, int stin, int enin) {
-    vector<vector<string>*> temp1(enin-stin+1);
-    vector<vector<string>*> temp2(enin-stin);
+int Pivot(vector<int>& data,int ctin, int stin, int enin) {
+    vector<int> temp1(enin-stin+1);
+    vector<int> temp2(enin-stin);
     int pivin = 0, t2in = 0;
     for (int i = 1; i < enin-stin+1; ++i) {
-        if (data[stin+i]->at(ctin) <= data[stin]->at(ctin)) {
+        if (Data.less(ctin, (stin+i), stin)) {
             temp1[pivin] = data[stin+i];
             ++pivin;
         } else {
@@ -71,32 +70,28 @@ int Pivot(vector<vector<string>*>& data,int ctin, int stin, int enin) {
     temp1[pivin] = data[stin];
     for (int i = 0; i <= pivin; ++i) {
         data[stin+i] = temp1[i];
-        auto it = id_index.find(temp1[i]->at(0));
-        if (it != id_index.end()) {
-            q_r_map[it->second] = stin + i;
+        if (temp1[i]%1000 == 999 && temp1[i]/1000 > 0) {
+            q_r_map[temp1[i]/1000] = stin + i;
             //rendering update needs to be called here
         }
         //check temp1[i][0] is in the id_index
         //use that int to update the q_r_map to stin + 1
         //call an update
-
     }
 
     for (int i = 0; i < t2in; ++i) {
         data[stin+pivin+i+1] = temp2[i];
-        auto it = id_index.find(temp2[i]->at(0));
-        if (it != id_index.end()) {
-            q_r_map[it->second] = stin+pivin+i+1;
+        if (temp2[i]%1000 == 999 && temp2[i]/1000 > 0) {
+            q_r_map[temp2[i]/1000] = stin+pivin+i+1;
             //rendering update needs to be called here
         }
         //check temp2[i][0] is in the id_index
         //use that int to update the q_r_map to stin+pivin+i+1
         //call an update
-
     }
     return stin+pivin;
 }
-void QuickSort(vector<vector<string>*>& data, int ctin, int stin, int enin) {
+void QuickSort(vector<int>& data, int ctin, int stin, int enin) {
     if (!(stin >= enin)) {
         int pin = Pivot(data, ctin, stin, enin);
         QuickSort(data, ctin, stin, pin-1);
@@ -105,6 +100,13 @@ void QuickSort(vector<vector<string>*>& data, int ctin, int stin, int enin) {
 }
 
 int main(int argc, char* argv[]) {
+    Data.load();
+    m_data = Data.identifyOrder();
+    q_data = m_data;
+    for (int i = 1; i < m_data.size()/1000; ++i) {
+        m_r_map[i] = m_data[i*1000-1];
+        q_r_map[i] = q_data[i*1000-1];
+    }
     if (!glfwInit()) return -1;
     Render render(1280, 720, "Supermarket Sort");   // Starts the main process loop
     return 0;
