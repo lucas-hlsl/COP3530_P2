@@ -11,6 +11,7 @@ Dataset Data;
 std::unordered_map<int,int> m_r_map, q_r_map;
 //[key : every thousandth transaction id, value: location of current index]
 //will be used for rendering purposes only relevant thing for rendering
+int renderCycles; // number of cycles since last render
 std::vector<int>  m_data, q_data; //each int represents a transaction row
 
 void Merge(std::vector<int>& data, int ctin, int stin, int mdin, int enin) {
@@ -38,8 +39,10 @@ void Merge(std::vector<int>& data, int ctin, int stin, int mdin, int enin) {
     for (int i = 0; i < enin-stin+1; ++i) {
         data[stin+i] = temp[i];
         if (temp[i]%1000 == 999 && temp[i]/1000 > 0) {
-            m_r_map[temp[i]/1000] = stin+i;
-            //rendering update needs to be called here
+            m_r_map[temp[i]/1000 + 1] = stin+i;
+            renderCycles++;
+            if (renderCycles >= 10) Render::__instance->draw(&m_r_map, &q_r_map, &Data);
+            renderCycles %= 10;
         }
         //check temp[i][0] is in the id_index
         //use that int to update the m_r_map to tin + stin
@@ -71,8 +74,10 @@ int Pivot(std::vector<int>& data,int ctin, int stin, int enin) {
     for (int i = 0; i <= pivin; ++i) {
         data[stin+i] = temp1[i];
         if (temp1[i]%1000 == 999 && temp1[i]/1000 > 0) {
-            q_r_map[temp1[i]/1000] = stin + i;
-            //rendering update needs to be called here
+            q_r_map[temp1[i]/1000 + 1] = stin + i;
+            renderCycles++;
+            if (renderCycles >= 10) Render::__instance->draw(&m_r_map, &q_r_map, &Data);
+            renderCycles %= 10;
         }
         //check temp1[i][0] is in the id_index
         //use that int to update the q_r_map to stin + 1
@@ -82,8 +87,10 @@ int Pivot(std::vector<int>& data,int ctin, int stin, int enin) {
     for (int i = 0; i < t2in; ++i) {
         data[stin+pivin+i+1] = temp2[i];
         if (temp2[i]%1000 == 999 && temp2[i]/1000 > 0) {
-            q_r_map[temp2[i]/1000] = stin+pivin+i+1;
-            //rendering update needs to be called here
+            q_r_map[temp2[i]/1000 + 1] = stin+pivin+i+1;
+            renderCycles++;
+            if (renderCycles >= 10) Render::__instance->draw(&m_r_map, &q_r_map, &Data);
+            renderCycles %= 10;
         }
         //check temp2[i][0] is in the id_index
         //use that int to update the q_r_map to stin+pivin+i+1
@@ -99,15 +106,29 @@ void QuickSort(std::vector<int>& data, int ctin, int stin, int enin) {
     }
 }
 
-int main(int argc, char* argv[]) {
-    Data.load();
-    m_data = Data.identifyOrder();
-    q_data = m_data;
-    for (int i = 1; i < m_data.size()/1000; ++i) {
-        m_r_map[i] = m_data[i*1000-1];
-        q_r_map[i] = q_data[i*1000-1];
+void MergeSort(int col) {
+    std::vector<int> data = Data.identityOrder();
+    for (int i = 1; i < data.size()/1000; ++i) {
+        m_r_map[i] = i * 1000 - 1;
     }
+    MergeSort(data, col, 0, data.size() - 1);
+}
+
+void QuickSort(int col) {
+    std::vector<int> data = Data.identityOrder();
+    for (int i = 1; i < data.size()/1000; ++i) {
+        q_r_map[i] = i * 1000 - 1;
+    }
+    QuickSort(data, col, 0, data.size() - 1);
+}
+
+int main(int argc, char* argv[]) {
     if (!glfwInit()) return -1;
+
+    Data.load("datasets/supermarket_large_dataset.csv");
+
     Render render(1280, 720, "Supermarket Sort");   // Starts the main process loop
+    while (render.draw(&m_r_map, &q_r_map, &Data));
+    glfwTerminate();
     return 0;
 }
