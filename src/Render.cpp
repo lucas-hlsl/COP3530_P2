@@ -35,26 +35,16 @@ void Render::mouseCallback(GLFWwindow* window, int button, int action, int mods)
 // 6 - Quick sort by Unit Price
 // 7 - Quick sort by Popularity Score
 void Render::command(int cmd) {
-    if (cmd == 0) {
-        sort_col = 8;
+    if (cmd == 0 || cmd == 4) sort_col = 8;
+    if (cmd == 1 || cmd == 5) sort_col = 26;
+    if (cmd == 2 || cmd == 6) sort_col = 111;
+    if (cmd == 3 || cmd == 7) sort_col = 133;
+    if (cmd >= 0 && cmd <= 3) {
         sorting = true;
         MergeSort(sort_col);
         sorting = false;
-    } 
-    if (cmd == 1) {
-        sort_col = 26;
-        sorting = true;
-        MergeSort(sort_col);
-        sorting = false;
-    } 
-    if (cmd == 4) {
-        sort_col = 8;
-        sorting = true;
-        QuickSort(sort_col);
-        sorting = false;
-    } 
-    if (cmd == 5) {
-        sort_col = 26;
+    }
+    if (cmd >= 4 && cmd <= 7) {
         sorting = true;
         QuickSort(sort_col);
         sorting = false;

@@ -38,7 +38,9 @@
                 "-std=c++17",
                 "-O2",
                 "-Wall",
+                "src/main.cpp",
                 "src/Dataset.cpp",
+                "src/Render.cpp",
                 "tests/test_dataset.cpp",
                 "-o",
                 "bin/test_dataset.exe"

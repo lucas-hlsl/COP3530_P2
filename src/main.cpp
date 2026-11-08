@@ -12,13 +12,12 @@ std::unordered_map<int,int> m_r_map, q_r_map;
 //[key : every thousandth transaction id, value: location of current index]
 //will be used for rendering purposes only relevant thing for rendering
 int renderCycles; // number of cycles since last render
-std::vector<int>  m_data, q_data; //each int represents a transaction row
 
 void Merge(std::vector<int>& data, int ctin, int stin, int mdin, int enin) {
     std::vector<int> temp(enin-stin+1);
     int ldin = stin, rdin = mdin+1, tin = 0; //left subarray data index, right subarray data index, temp array index
     while (ldin <= mdin && rdin <= enin) {
-        if (Data.less(ctin, ldin, rdin)) {
+        if (Data.less(ctin, data[ldin], data[rdin])) {
             temp[tin] = data[ldin];
             ++ldin;
         } else {
@@ -27,18 +26,15 @@ void Merge(std::vector<int>& data, int ctin, int stin, int mdin, int enin) {
         }
         ++tin;
     }
-    for (int i = 0; i < (mdin - ldin) + (enin - rdin) + 2; ++i) {
-        if ((mdin - ldin) == -1) {
-            temp[tin] = data[rdin + i];
-        } else if ((enin - rdin) == -1) {
-            temp[tin] = data[ldin + i];
-        }
-        ++tin;
+    while (ldin <= mdin) {              // put remaining left sub array elements in temp
+        temp[tin++] = data[ldin++];
     }
-    //^above deals with whats left after the while loop
+    while (rdin <= enin) {              // put remaining right sub array elements in temp
+        temp[tin++] = data[rdin++];
+    }
     for (int i = 0; i < enin-stin+1; ++i) {
         data[stin+i] = temp[i];
-        if (temp[i]%1000 == 999 && temp[i]/1000 > 0) {
+        if (temp[i]%1000 == 999) {
             m_r_map[temp[i]/1000 + 1] = stin+i;
             renderCycles++;
             if (renderCycles >= 10) Render::__instance->draw(&m_r_map, &q_r_map, &Data);
@@ -50,7 +46,7 @@ void Merge(std::vector<int>& data, int ctin, int stin, int mdin, int enin) {
     }
 }
 void MergeSort(std::vector<int>& data, int ctin, int stin, int enin) { //data, category index, start indsex, end index
-    if (!(stin >= enin)) {
+    if (stin < enin) {
         int mdin = (stin + enin)/2; // middle index
         MergeSort(data, ctin, stin, mdin);
         MergeSort(data, ctin, (mdin+1), enin);
@@ -62,7 +58,7 @@ int Pivot(std::vector<int>& data,int ctin, int stin, int enin) {
     std::vector<int> temp2(enin-stin);
     int pivin = 0, t2in = 0;
     for (int i = 1; i < enin-stin+1; ++i) {
-        if (Data.less(ctin, (stin+i), stin)) {
+        if (Data.less(ctin, data[(stin+i)], data[stin])) {
             temp1[pivin] = data[stin+i];
             ++pivin;
         } else {
@@ -73,7 +69,7 @@ int Pivot(std::vector<int>& data,int ctin, int stin, int enin) {
     temp1[pivin] = data[stin];
     for (int i = 0; i <= pivin; ++i) {
         data[stin+i] = temp1[i];
-        if (temp1[i]%1000 == 999 && temp1[i]/1000 > 0) {
+        if (temp1[i]%1000 == 999) {
             q_r_map[temp1[i]/1000 + 1] = stin + i;
             renderCycles++;
             if (renderCycles >= 10) Render::__instance->draw(&m_r_map, &q_r_map, &Data);
@@ -86,7 +82,7 @@ int Pivot(std::vector<int>& data,int ctin, int stin, int enin) {
 
     for (int i = 0; i < t2in; ++i) {
         data[stin+pivin+i+1] = temp2[i];
-        if (temp2[i]%1000 == 999 && temp2[i]/1000 > 0) {
+        if (temp2[i]%1000 == 999) {
             q_r_map[temp2[i]/1000 + 1] = stin+pivin+i+1;
             renderCycles++;
             if (renderCycles >= 10) Render::__instance->draw(&m_r_map, &q_r_map, &Data);
@@ -99,7 +95,7 @@ int Pivot(std::vector<int>& data,int ctin, int stin, int enin) {
     return stin+pivin;
 }
 void QuickSort(std::vector<int>& data, int ctin, int stin, int enin) {
-    if (!(stin >= enin)) {
+    if (stin < enin) {
         int pin = Pivot(data, ctin, stin, enin);
         QuickSort(data, ctin, stin, pin-1);
         QuickSort(data, ctin, (pin+1), enin);
