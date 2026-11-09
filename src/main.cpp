@@ -37,8 +37,8 @@ void Merge(std::vector<int>& data, int ctin, int stin, int mdin, int enin) {
         if (temp[i]%1000 == 999) {
             m_r_map[(temp[i]+ 1)/1000] = stin+i;
             renderCycles++;
-            if (renderCycles >= 10) Render::__instance->draw(&m_r_map, &q_r_map, &Data);
-            renderCycles %= 10;
+            if (renderCycles >= 50) Render::__instance->draw(&m_r_map, &q_r_map, &Data);
+            renderCycles %= 50;
         }
         //check temp[i][0] is in the id_index
         //use that int to update the m_r_map to tin + stin
@@ -72,8 +72,8 @@ int Pivot(std::vector<int>& data,int ctin, int stin, int enin) {
         if (temp1[i]%1000 == 999) {
             q_r_map[(temp1[i]+ 1)/1000] = stin + i;
             renderCycles++;
-            if (renderCycles >= 10) Render::__instance->draw(&m_r_map, &q_r_map, &Data);
-            renderCycles %= 10;
+            if (renderCycles >= 2000) Render::__instance->draw(&m_r_map, &q_r_map, &Data);
+            renderCycles %= 2000;
         }
         //check temp1[i][0] is in the id_index
         //use that int to update the q_r_map to stin + 1
@@ -85,8 +85,8 @@ int Pivot(std::vector<int>& data,int ctin, int stin, int enin) {
         if (temp2[i]%1000 == 999) {
             q_r_map[(temp2[i]+ 1)/1000] = stin+pivin+i+1;
             renderCycles++;
-            if (renderCycles >= 10) Render::__instance->draw(&m_r_map, &q_r_map, &Data);
-            renderCycles %= 10;
+            if (renderCycles >= 2000) Render::__instance->draw(&m_r_map, &q_r_map, &Data);
+            renderCycles %= 2000;
         }
         //check temp2[i][0] is in the id_index
         //use that int to update the q_r_map to stin+pivin+i+1
