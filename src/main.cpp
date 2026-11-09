@@ -35,7 +35,7 @@ void Merge(std::vector<int>& data, int ctin, int stin, int mdin, int enin) {
     for (int i = 0; i < enin-stin+1; ++i) {
         data[stin+i] = temp[i];
         if (temp[i]%1000 == 999) {
-            m_r_map[temp[i]/1000 + 1] = stin+i;
+            m_r_map[(temp[i]+ 1)/1000] = stin+i;
             renderCycles++;
             if (renderCycles >= 10) Render::__instance->draw(&m_r_map, &q_r_map, &Data);
             renderCycles %= 10;
@@ -57,8 +57,8 @@ int Pivot(std::vector<int>& data,int ctin, int stin, int enin) {
     std::vector<int> temp1(enin-stin+1);
     std::vector<int> temp2(enin-stin);
     int pivin = 0, t2in = 0;
-    for (int i = 1; i < enin-stin+1; ++i) {
-        if (Data.less(ctin, data[(stin+i)], data[stin])) {
+    for (int i = 1; i <= enin-stin; ++i) {
+        if (Data.less(ctin, data[(stin+i)], data[stin])) { //
             temp1[pivin] = data[stin+i];
             ++pivin;
         } else {
@@ -70,7 +70,7 @@ int Pivot(std::vector<int>& data,int ctin, int stin, int enin) {
     for (int i = 0; i <= pivin; ++i) {
         data[stin+i] = temp1[i];
         if (temp1[i]%1000 == 999) {
-            q_r_map[temp1[i]/1000 + 1] = stin + i;
+            q_r_map[(temp1[i]+ 1)/1000] = stin + i;
             renderCycles++;
             if (renderCycles >= 10) Render::__instance->draw(&m_r_map, &q_r_map, &Data);
             renderCycles %= 10;
@@ -83,7 +83,7 @@ int Pivot(std::vector<int>& data,int ctin, int stin, int enin) {
     for (int i = 0; i < t2in; ++i) {
         data[stin+pivin+i+1] = temp2[i];
         if (temp2[i]%1000 == 999) {
-            q_r_map[temp2[i]/1000 + 1] = stin+pivin+i+1;
+            q_r_map[(temp2[i]+ 1)/1000] = stin+pivin+i+1;
             renderCycles++;
             if (renderCycles >= 10) Render::__instance->draw(&m_r_map, &q_r_map, &Data);
             renderCycles %= 10;
@@ -97,14 +97,14 @@ int Pivot(std::vector<int>& data,int ctin, int stin, int enin) {
 void QuickSort(std::vector<int>& data, int ctin, int stin, int enin) {
     if (stin < enin) {
         int pin = Pivot(data, ctin, stin, enin);
-        QuickSort(data, ctin, stin, pin-1);
+        QuickSort(data, ctin, stin, (pin-1));
         QuickSort(data, ctin, (pin+1), enin);
     }
 }
 
 void MergeSort(int col) {
     std::vector<int> data = Data.identityOrder();
-    for (int i = 1; i < data.size()/1000; ++i) {
+    for (int i = 1; i < int(data.size())/1000; ++i) {
         m_r_map[i] = i * 1000 - 1;
     }
     MergeSort(data, col, 0, data.size() - 1);
@@ -112,7 +112,7 @@ void MergeSort(int col) {
 
 void QuickSort(int col) {
     std::vector<int> data = Data.identityOrder();
-    for (int i = 1; i < data.size()/1000; ++i) {
+    for (int i = 1; i < int(data.size())/1000; ++i) {
         q_r_map[i] = i * 1000 - 1;
     }
     QuickSort(data, col, 0, data.size() - 1);
